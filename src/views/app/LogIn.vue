@@ -1,22 +1,24 @@
 <script setup>
 import { reactive } from "vue";
-import { useRouter } from "vue-router";
 import { useTemplateStore } from "@/stores/template";
+import { Form } from "vee-validate";
+import { useAuthStore } from "@/stores";
 
 // Main store and Router
 const store = useTemplateStore();
-const router = useRouter();
+const authStore = useAuthStore();
 
 // Input state variables
-const state = reactive({
-  username: null,
+const form = reactive({
+  email: null,
   password: null,
 });
 
 // On form submission
-async function onSubmit() {
-  // Go to dashboard
-  router.push({ name: "backend-pages-auth" });
+async function onSubmit(values, { setErrors }) {
+  await authStore
+    .login(form.email, form.password)
+    .catch((error) => setErrors(error));
 }
 </script>
 
@@ -38,77 +40,48 @@ async function onSubmit() {
               </div>
               <!-- END Header -->
 
-              <!-- Sign In Form -->
-              <form @submit.prevent="onSubmit">
+              <Form @submit="onSubmit" v-slot="{ errors, isSubmitting }">
                 <div class="py-3">
                   <div class="mb-4">
                     <input
-                      type="text"
-                      class="form-control form-control-lg form-control-alt"
-                      id="login-username"
-                      name="login-username"
-                      placeholder="Username"
-                      :class="{
-                        'is-invalid': v$.username.$errors.length,
-                      }"
-                      v-model="state.username"
-                      @blur="v$.username.$touch"
+                      name="email"
+                      type="email"
+                      placeholder="Email"
+                      v-model="form.email"
+                      class="form-control form-control-alt form-control-lg"
+                      :class="{ 'is-invalid': errors.email }"
                     />
-                    <div
-                      v-if="v$.username.$errors.length"
-                      class="invalid-feedback animated fadeIn"
-                    >
-                      Please enter your username
+                    <div class="invalid-feedback animated fadeIn">
+                      {{ errors.email }}
                     </div>
                   </div>
                   <div class="mb-4">
                     <input
+                      name="password"
                       type="password"
-                      class="form-control form-control-lg form-control-alt"
-                      id="login-password"
-                      name="login-password"
+                      v-model="form.password"
                       placeholder="Password"
-                      :class="{
-                        'is-invalid': v$.password.$errors.length,
-                      }"
-                      v-model="state.password"
-                      @blur="v$.password.$touch"
+                      class="form-control form-control-alt form-control-lg"
+                      :class="{ 'is-invalid': errors.password }"
                     />
-                    <div
-                      v-if="v$.password.$errors.length"
-                      class="invalid-feedback animated fadeIn"
-                    >
-                      Please enter your password
+                    <div class="invalid-feedback animated fadeIn">
+                      {{ errors.password }}
                     </div>
                   </div>
-                  <div class="mb-4">
-                    <div
-                      class="d-md-flex align-items-md-center justify-content-md-between"
-                    >
-                      <div class="form-check">
-                        <input
-                          class="form-check-input"
-                          type="checkbox"
-                          value=""
-                          id="login-remember"
-                          name="login-remember"
-                        />
-                        <label class="form-check-label" for="login-remember"
-                          >Remember Me</label
-                        >
-                      </div>
-                    </div>
+                  <div
+                    v-if="errors.message"
+                    class="alert alert-danger mt-3 mb-0"
+                  >
+                    {{ errors.message }}
                   </div>
                 </div>
-                <div class="row justify-content-center">
-                  <div class="col-lg-6 col-xxl-5">
-                    <button type="submit" class="btn w-100 btn-alt-primary">
-                      <i class="fa fa-fw fa-sign-in-alt me-1 opacity-50"></i>
-                      Login
-                    </button>
-                  </div>
+                <div class="d-flex justify-content-end">
+                  <button :disabled="isSubmitting" class="btn btn-alt-primary">
+                    <i class="fa fa-fw fa-sign-in-alt me-1 opacity-50"></i>
+                    Login
+                  </button>
                 </div>
-              </form>
+              </Form>
               <!-- END Sign In Form -->
             </div>
           </div>

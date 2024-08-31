@@ -1,5 +1,6 @@
-<script setup></script>
-
+<script setup>
+alert(import.meta.env.VITE_APP_TITLE);
+</script>
 <template>
   <!-- Page Content -->
   <div class="content">
