@@ -3,10 +3,8 @@ import { computed, onMounted } from "vue";
 import { useTemplateStore } from "@/stores/template";
 
 // Import all layout partials
-import BaseHeader from "@/layouts/partials/Header.vue";
-import BaseSidebar from "@/layouts/partials/Sidebar.vue";
-import BaseSideOverlay from "@/layouts/partials/SideOverlay.vue";
-import BaseFooter from "@/layouts/partials/Footer.vue";
+import BaseHeader from "@/layouts/partials/BaseHeader.vue";
+import BaseFooter from "@/layouts/partials/BaseFooter.vue";
 
 // Component properties
 defineProps({
@@ -108,41 +106,6 @@ onMounted(() => {
       @click="store.sideOverlay({ mode: 'close' })"
     ></div>
     <!-- END Page Overlay -->
-
-    <!-- Side Overlay -->
-    <BaseSideOverlay v-if="store.layout.sideOverlay">
-      <template #header>
-        <slot name="side-overlay-header"></slot>
-      </template>
-
-      <template #content>
-        <slot name="side-overlay-content"></slot>
-      </template>
-
-      <slot name="side-overlay"></slot>
-    </BaseSideOverlay>
-    <!-- END Side Overlay -->
-
-    <!-- Sidebar -->
-    <BaseSidebar
-      v-if="store.layout.sidebar"
-      :with-mini-nav="sidebarWithMiniNav"
-    >
-      <template #header>
-        <slot name="sidebar-header"></slot>
-      </template>
-
-      <template #header-extra>
-        <slot name="sidebar-header-extra"></slot>
-      </template>
-
-      <template #content>
-        <slot name="sidebar-content"></slot>
-      </template>
-
-      <slot name="sidebar"></slot>
-    </BaseSidebar>
-    <!-- END Sidebar -->
 
     <!-- Header -->
     <BaseHeader v-if="store.layout.header">
