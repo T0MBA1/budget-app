@@ -8,23 +8,7 @@ export const instance = {
   delete: request("DELETE"),
 };
 NProgress.configure({ showSpinner: true });
-
-function request(method) {
-  return async (endpoint, body) => {
-    NProgress.start();
-    const url = import.meta.env.VITE_API_URL + endpoint;
-    const requestOptions = {
-      method,
-      headers: authHeader(url),
-    };
-    if (body) {
-      requestOptions.headers["Content-Type"] = "application/json";
-      requestOptions.body = JSON.stringify(body);
-    }
-    const response = await fetch(url, requestOptions);
-    return handleResponse(response);
-  };
-}
+const ignored_code = [401, 422];
 
 // helper functions
 function authHeader(url) {
@@ -39,31 +23,41 @@ function authHeader(url) {
   }
 }
 
-function handleResponse(response) {
-  return response.text().then((text) => {
+function request(method) {
+  return (endpoint, body) => {
+    NProgress.start();
+    const url = import.meta.env.VITE_API_URL + endpoint;
+    const requestOptions = {
+      method,
+      headers: authHeader(url),
+    };
+    if (body) {
+      requestOptions.headers["Content-Type"] = "application/json";
+      requestOptions.body = JSON.stringify(body);
+    }
+    const response = fetchInstance(url, requestOptions, 2);
+    NProgress.done();
+    return response;
+  };
+}
+
+function fetchInstance(url, options = {}, retries) {
+  const callback = fetch(url, options);
+  const response = callback.text().then((text) => {
     const data = text && JSON.parse(text);
-
-    if (!response.ok) {
-      // const { user, logout } = useAuthStore();
-      // Object.prototype.hasOwnProperty.call(response, "retryAttempts")
-      const config = 1;
-      return response(config);
-      // return Promise.reject(config);
-      // if (response.status === 401 && user) {
-      //   response.retryAttempts = 1;
-      //   console.log(response);
-      //   // if (data.message === 'TOKEN_EXPIRED' && user.refresh_token) {
-
-      //   // }
-      //   // auto logout if 401 Unauthorized or 403 Forbidden response returned from api
-      //   logout();
-      // }
-      // const error = (data && data.data) || { apiMessage: data.message };
-      // NProgress.done();
-      // return Promise.reject(error);
+    if (!callback.ok) {
+      const error = data && data.data;
+      if (ignored_code.includes(callback.status)) {
+        if (retries > 0 && callback.status === 401) {
+          return fetchInstance(url, options, retries - 1);
+        }
+        return Promise.reject(error);
+        //TO DO
+      }
     }
 
-    NProgress.done();
     return data;
   });
+
+  return response;
 }
