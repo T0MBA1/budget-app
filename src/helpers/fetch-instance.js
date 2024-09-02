@@ -41,8 +41,8 @@ function request(method) {
   };
 }
 
-function fetchInstance(url, options = {}, retries) {
-  const callback = fetch(url, options);
+async function fetchInstance(url, options = {}, retries) {
+  const callback = await fetch(url, options);
   const response = callback.text().then((text) => {
     const data = text && JSON.parse(text);
     if (!callback.ok) {
