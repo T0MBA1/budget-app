@@ -1,67 +1,63 @@
 import { defineStore } from "pinia";
 import { instance } from "@/helpers";
 import router from "@/router";
+import Cookies from "universal-cookie";
+
+const cookies = new Cookies(null, { path: "/" });
 
 export const useAuthStore = defineStore({
   id: "auth",
   state: () => ({
     // initialize state from local storage to enable user to stay logged in
-    user: JSON.parse(localStorage.getItem("user")),
-    token: JSON.parse(localStorage.getItem("token")),
+    user: cookies.get("user"),
+    token: cookies.get("token"),
+    refresh_token: cookies.get("refresh_token"),
     returnUrl: null,
-    menu: JSON.parse(localStorage.getItem("menu")),
   }),
   actions: {
     async me() {
       await instance.get("/me").then((response) => {
-        const user = response.data.data;
-        localStorage.setItem("user", JSON.stringify(user));
+        const user = response.data;
+        cookies.set("user", JSON.stringify(user));
         this.user = user;
       });
     },
-    async login(username, password) {
+    async login(email, password) {
       const auth = await instance
         .post("/login", {
-          username,
+          email,
           password,
         })
         .then((response) => {
-          return response.data.data;
+          const result = response.data;
+          cookies.set("token", result.token);
+          cookies.set("refresh_token", result.refresh);
+
+          return result;
         });
 
-      const token = {
-        token: auth.token,
-        refresh_token: auth.refresh,
-      };
-
-      this.token = token;
-      localStorage.setItem("token", JSON.stringify(token));
       if (auth.token) {
-        await this.getMenu();
+        this.token = auth.token;
+        this.refresh_token = auth.refresh;
+        console.log("tokenlogin", cookies.get("token"));
         await this.me();
       }
       router.push(this.returnUrl || "/");
     },
     async refresh(refresh_token) {
-      const refresh = await instance
+      const result = await instance
         .post("/refresh", { refresh_token })
         .then((response) => {
-          return response.data.data;
-        });
-      const token = {
-        token: refresh.token,
-        refresh_token: refresh_token,
-      };
+          const refresh = response.data;
+          cookies.set("token", refresh.token);
+          cookies.set("refresh_token", refresh.refresh);
 
-      this.token = token;
-      localStorage.setItem("token", JSON.stringify(token));
-    },
-    async getMenu() {
-      const respon = await instance.get("/menu").then((response) => {
-        return response.data.data;
-      });
-      this.menu = respon;
-      localStorage.setItem("menu", JSON.stringify(respon));
+          return refresh;
+        });
+
+      if (result.token) {
+        this.token = result.token;
+      }
     },
     async logout() {
       const token = this.user.token;
@@ -75,20 +71,15 @@ export const useAuthStore = defineStore({
             console.log(443, error);
           });
       }
-      this.user = null;
-      this.token = null;
-      localStorage.removeItem("user");
-      localStorage.removeItem("menu");
-      localStorage.removeItem("token");
-      localStorage.removeItem("app-detail");
-      router.push("/login");
+      this.clearData();
     },
     clearData() {
       this.user = null;
-      localStorage.removeItem("user");
-      localStorage.removeItem("menu");
-      localStorage.removeItem("token");
-      localStorage.removeItem("app-detail");
+      this.token = null;
+      this.refresh_token = null;
+      cookies.remove("user");
+      cookies.remove("token");
+      cookies.remove("refresh_token");
       router.push("/login");
     },
   },

@@ -10,8 +10,8 @@ const authStore = useAuthStore();
 
 // Input state variables
 const form = reactive({
-  email: null,
-  password: null,
+  email: "afd.zik@gmail.com",
+  password: "@A5Agrapana",
 });
 
 // On form submission

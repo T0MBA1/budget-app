@@ -16,6 +16,8 @@ function authHeader(url) {
   const { token } = useAuthStore();
   const isLoggedIn = !!token;
   const isApiUrl = url.startsWith(import.meta.env.VITE_API_URL);
+
+  console.log("tokenda", isLoggedIn, isApiUrl);
   if (isLoggedIn && isApiUrl) {
     return { Authorization: `Bearer ${token}` };
   } else {
