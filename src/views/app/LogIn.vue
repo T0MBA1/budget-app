@@ -1,7 +1,6 @@
 <script setup>
 import { reactive } from "vue";
 import { useTemplateStore } from "@/stores/template";
-import { Form } from "vee-validate";
 import { useAuthStore } from "@/stores";
 
 // Main store and Router
@@ -9,16 +8,25 @@ const store = useTemplateStore();
 const authStore = useAuthStore();
 
 // Input state variables
-const form = reactive({
+const value = reactive({
   email: "afd.zik@gmail.com",
   password: "@A5Agrapana",
 });
 
+const form = reactive({
+  isSubmitting: false,
+  errors: [],
+  errorMessage: null,
+});
+
 // On form submission
-async function onSubmit(values, { setErrors }) {
-  await authStore
-    .login(form.email, form.password)
-    .catch((error) => setErrors(error));
+async function onSubmit() {
+  form.isSubmitting = true;
+  await authStore.login(value.email, value.password).catch((error) => {
+    form.errors = error.data;
+    form.errorMessage = error.message;
+    form.isSubmitting = false;
+  });
 }
 </script>
 
@@ -40,48 +48,49 @@ async function onSubmit(values, { setErrors }) {
               </div>
               <!-- END Header -->
 
-              <Form @submit="onSubmit" v-slot="{ errors, isSubmitting }">
+              <form @submit.prevent="onSubmit">
+                <div
+                  v-if="form.errorMessage"
+                  class="alert alert-danger mt-3 mb-0"
+                >
+                  {{ form.errorMessage }}
+                </div>
                 <div class="py-3">
                   <div class="mb-4">
                     <input
                       name="email"
                       type="email"
                       placeholder="Email"
-                      v-model="form.email"
+                      v-model="value.email"
                       class="form-control form-control-alt form-control-lg"
-                      :class="{ 'is-invalid': errors.email }"
+                      :class="{ 'is-invalid': form.errors.email }"
+                      @blur="form.errors.email = null"
                     />
-                    <div class="invalid-feedback animated fadeIn">
-                      {{ errors.email }}
-                    </div>
+                    <ErrorInput :errors="form.errors.email" />
                   </div>
                   <div class="mb-4">
                     <input
                       name="password"
                       type="password"
-                      v-model="form.password"
+                      v-model="value.password"
                       placeholder="Password"
                       class="form-control form-control-alt form-control-lg"
-                      :class="{ 'is-invalid': errors.password }"
+                      :class="{ 'is-invalid': form.errors.password }"
+                      @blur="form.errors.password = null"
                     />
-                    <div class="invalid-feedback animated fadeIn">
-                      {{ errors.password }}
-                    </div>
-                  </div>
-                  <div
-                    v-if="errors.message"
-                    class="alert alert-danger mt-3 mb-0"
-                  >
-                    {{ errors.message }}
+                    <ErrorInput :errors="form.errors.password" />
                   </div>
                 </div>
                 <div class="d-flex justify-content-end">
-                  <button :disabled="isSubmitting" class="btn btn-alt-primary">
+                  <button
+                    :disabled="form.isSubmitting"
+                    class="btn btn-alt-primary"
+                  >
                     <i class="fa fa-fw fa-sign-in-alt me-1 opacity-50"></i>
                     Login
                   </button>
                 </div>
-              </Form>
+              </form>
               <!-- END Sign In Form -->
             </div>
           </div>

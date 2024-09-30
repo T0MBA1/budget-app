@@ -1,5 +1,5 @@
 <script setup>
-alert(import.meta.env.VITE_APP_TITLE);
+// alert(import.meta.env.VITE_APP_TITLE);
 </script>
 <template>
   <!-- Page Content -->

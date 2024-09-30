@@ -38,7 +38,6 @@ function request(method) {
       requestOptions.body = JSON.stringify(body);
     }
     const response = fetchInstance(url, requestOptions, 2);
-    NProgress.done();
     return response;
   };
 }
@@ -48,18 +47,22 @@ async function fetchInstance(url, options = {}, retries) {
   const response = callback.text().then((text) => {
     const data = text && JSON.parse(text);
     if (!callback.ok) {
-      const error = data && data.data;
+      const error = data || data.data;
       if (ignored_code.includes(callback.status)) {
         if (retries > 0 && callback.status === 401) {
           return fetchInstance(url, options, retries - 1);
         }
-        return Promise.reject(error);
-        //TO DO
+        // console.log("fetcErr", error);
+        // return Promise.reject(error);
+        // //TO DO
       }
+
+      return Promise.reject(error);
     }
 
     return data;
   });
 
+  NProgress.done();
   return response;
 }

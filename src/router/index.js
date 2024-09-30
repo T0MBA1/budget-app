@@ -9,6 +9,14 @@ import ContentPage from "@/layouts/variations/ContentPage.vue";
 const Dashboard = () => import("@/views/app/DashboardView.vue");
 const Profile = () => import("@/views/app/User/UserProfile.vue");
 const LogIn = () => import("@/views/app/LogIn.vue");
+const Menu = () => import("@/views/app/MenuView.vue");
+
+const AccountList = () =>
+  import("@/views/app/MasterData/Account/ListAccount.vue");
+const AccountAdd = () =>
+  import("@/views/app/MasterData/Account/AddAccount.vue");
+const AccountEdit = () =>
+  import("@/views/app/MasterData/Account/EditAccount.vue");
 
 // Set all routes
 const routes = [
@@ -25,6 +33,26 @@ const routes = [
         path: "/profile",
         name: "profile",
         component: Profile,
+      },
+      {
+        path: "/menu",
+        name: "menu",
+        component: Menu,
+      },
+      {
+        path: "/account",
+        name: "account-index",
+        component: AccountList,
+      },
+      {
+        path: "/account/add",
+        name: "account-add",
+        component: AccountAdd,
+      },
+      {
+        path: "/account/:id",
+        name: "account-edit",
+        component: AccountEdit,
       },
     ],
   },

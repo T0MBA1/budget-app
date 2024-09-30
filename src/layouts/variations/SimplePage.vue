@@ -8,10 +8,10 @@ const store = useTemplateStore();
 
 // Set default elements for this layout
 store.setLayout({
-  header: false,
+  header: true,
   sidebar: false,
   sideOverlay: false,
-  footer: false,
+  footer: true,
 });
 
 // Set various template options for this layout variation
