@@ -2,6 +2,8 @@ import { createRouter, createWebHistory } from "vue-router";
 
 import NProgress from "nprogress/nprogress.js";
 
+// import { useAuthStore } from "@/stores";
+
 // Main layouts
 import ContentPage from "@/layouts/variations/ContentPage.vue";
 
@@ -16,7 +18,7 @@ const routes = [
     component: ContentPage,
     children: [
       {
-        path: "/",
+        path: "/dashboard",
         name: "dashboard",
         component: Dashboard,
       },
@@ -44,6 +46,21 @@ const router = createRouter({
   },
   routes,
 });
+
+// router.beforeEach(async (to) => {
+//   // redirect to login page if not logged in and trying to access a restricted page
+//   const publicPages = ["/login"];
+//   const authRequired = !publicPages.includes(to.path);
+//   const auth = useAuthStore();
+//   if (authRequired && !auth.user) {
+//     auth.returnUrl = to.fullPath;
+//     return "/login";
+//   }
+
+//   if (to.name === "login" && auth.user) {
+//     return "/";
+//   }
+// });
 
 // NProgress
 /*eslint-disable no-unused-vars*/
