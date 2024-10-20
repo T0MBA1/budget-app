@@ -16,10 +16,18 @@ function authHeader(url) {
   const { token } = useAuthStore();
   const isLoggedIn = !!token;
   const isApiUrl = url.startsWith(import.meta.env.VITE_API_URL);
+
   if (isLoggedIn && isApiUrl) {
-    return { Authorization: `Bearer ${token}` };
+    return {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    };
   } else {
-    return {};
+    return {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    };
   }
 }
 
@@ -31,12 +39,10 @@ function request(method) {
       method,
       headers: authHeader(url),
     };
-    if (body) {
-      requestOptions.headers["Content-Type"] = "application/json";
+    if (body && method != "GET") {
       requestOptions.body = JSON.stringify(body);
     }
     const response = fetchInstance(url, requestOptions, 2);
-    NProgress.done();
     return response;
   };
 }
@@ -46,18 +52,24 @@ async function fetchInstance(url, options = {}, retries) {
   const response = callback.text().then((text) => {
     const data = text && JSON.parse(text);
     if (!callback.ok) {
-      const error = data && data.data;
+      const error = data || data.data;
       if (ignored_code.includes(callback.status)) {
         if (retries > 0 && callback.status === 401) {
           return fetchInstance(url, options, retries - 1);
         }
-        return Promise.reject(error);
-        //TO DO
+        // const { logout } = useAuthStore();
+        // logout();
+        // console.log("fetcErr", token);
+        // return Promise.reject(error);
+        // //TO DO
       }
+
+      return Promise.reject(error);
     }
 
     return data;
   });
 
+  NProgress.done();
   return response;
 }

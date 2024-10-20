@@ -32,6 +32,7 @@ export const useAuthStore = defineStore({
         })
         .then((response) => {
           const result = response.data;
+          this.token = result.token;
           cookies.set("token", result.token);
           cookies.set("refresh_token", result.refresh);
 
@@ -39,8 +40,7 @@ export const useAuthStore = defineStore({
         });
 
       if (auth.token) {
-        this.token = auth.token;
-        this.refresh_token = auth.refresh;
+        // await this.getMenu();
         await this.me();
       }
       router.push(this.returnUrl || "/");
@@ -61,17 +61,17 @@ export const useAuthStore = defineStore({
       }
     },
     async logout() {
-      const token = this.user.token;
-      if (token) {
-        await instance
-          .post("/logout", { token })
-          .then((response) => {
-            return response.data.data;
-          })
-          .catch((error) => {
-            console.log(443, error);
-          });
-      }
+      // const token = this.user.token;
+      // if (token) {
+      //   await instance
+      //     .post("/logout", { token })
+      //     .then((response) => {
+      //       return response.data.data;
+      //     })
+      //     .catch((error) => {
+      //       console.log(443, error);
+      //     });
+      // }
       this.clearData();
     },
     clearData() {

@@ -1,10 +1,12 @@
 <script setup>
 import { useTemplateStore } from "@/stores/template";
+import { useAuthStore } from "@/stores";
 
 import BaseLayout from "@/layouts/BaseLayout.vue";
 
 // Main store
 const store = useTemplateStore();
+const authStore = useAuthStore();
 
 // Set default elements for this layout
 store.setLayout({
@@ -13,6 +15,10 @@ store.setLayout({
   sideOverlay: false,
   footer: true,
 });
+
+function logout() {
+  authStore.logout();
+}
 
 // Set various template options for this layout variation
 store.headerStyle({ mode: "dark" });
@@ -94,12 +100,12 @@ store.mainContent({ mode: "boxed" });
             </div>
             <div role="separator" class="dropdown-divider m-0"></div>
             <div class="p-2">
-              <RouterLink
-                :to="{ name: 'login' }"
+              <a
+                @click="logout"
                 class="dropdown-item d-flex align-items-center justify-content-between"
               >
                 <span class="fs-sm fw-medium">Log Out</span>
-              </RouterLink>
+              </a>
             </div>
           </div>
         </div>
